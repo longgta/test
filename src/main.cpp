@@ -7,6 +7,13 @@
 #include <time.h>
 #include <GxEPD2_750c_Z08.h>
 
+#include <BLEDevice.h>
+#include <BLEUtils.h>
+#include <BLEServer.h>
+
+#include <SD.h>
+#include <FS.h>
+#include <SPI.h>
 //#include "jpg.h"
 
 #define NORMAL_FONT u8g2_font_wqy16_t_gb2312a  //设置NORMAL_FONT默认字体
@@ -23,7 +30,7 @@ const char* password = "";
 
 U8G2_FOR_ADAFRUIT_GFX u8g2Fonts;
 
-GxEPD2_3C<GxEPD2_750c_Z08, GxEPD2_750c_Z08::HEIGHT / 2> display(GxEPD2_750c_Z08(/*CS=D8*/ 4, /*DC=D3*/ 27, /*RST=D4*/ 26, /*BUSY=D2*/ 25));  
+GxEPD2_3C<GxEPD2_750c_Z08, GxEPD2_750c_Z08::HEIGHT / 2> display(GxEPD2_750c_Z08(/*CS=D8*/ 4, /*DC=D3*/ 27, /*RST=D4*/ 26, /*BUSY=D2*/ 25));  //真正的引脚定义？
 
 
 
@@ -41,6 +48,8 @@ void setup() {
   }
   Serial.println("\nConnected to WiFi");
 
+
+
   if (time(nullptr) < 1000000000) {
     // 如果没有获取过时间，重新获取时间
     uint8_t i = 0;
@@ -51,6 +60,7 @@ void setup() {
       delay(500);
     }
     Serial.println("时间同步成功");
+
   }
 
 
@@ -121,7 +131,8 @@ void setup() {
 
   } while (display.nextPage());
 
-
+    
+//局部刷新代码
    for (int i = 0; i < 3; i++) {
      //display.fillScreen(GxEPD_BLACK);
      display.setPartialWindow(248, 204, 120, 120);
@@ -139,6 +150,7 @@ void setup() {
      } while (display.nextPageBW());
    }
   
+
    for (int i = 0; i < 3; i++) {
   
      display.setPartialWindow(434, 204, 120, 120);
@@ -172,6 +184,8 @@ void setup() {
        Serial.println(i);
      } while (display.nextPage());
    }
+
+
   // 显示“时间获取中...”
   display.setPartialWindow(175, 329, 450, 120);
   display.firstPage();
@@ -183,11 +197,13 @@ void setup() {
     u8g2Fonts.print("时间获取中...");
   } while (display.nextPageBW());
 
+
   delay(3000);  // 延迟3秒
 
 
   display.powerOff();
 }
+
 
 void loop() {
   static int prevHour = -1;  // 用于存储上一次获取的小时
